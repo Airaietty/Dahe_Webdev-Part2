@@ -1,0 +1,63 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Matcha Corner - Login</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+    <div class="container">
+        <h1>matcha corner</h1>
+        <h2>login page</h2>
+
+        <form id="loginForm">
+
+            <label>user</label>
+            <input type="text" id="username" required>
+
+            <label>password</label>
+            <input type="password" id="password" required>
+
+            <div class="buttons">
+                <a class="button-link" href="/register">register</a>
+                <button type="submit">login</button>
+            </div>
+
+        </form>
+    </div>
+
+    <script>
+        document.getElementById("loginForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
+
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+
+            try {
+                const response = await fetch("/api/login", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({
+                        username: username,
+                        password: password
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert("Login successful!");
+                    window.location.href = "/profile";
+                } else {
+                    alert(data.detail);
+                }
+
+            } catch (error) {
+                alert("Something went wrong.");
+            }
+        });
+    </script>
+
+</body>
+</html>

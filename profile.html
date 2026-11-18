@@ -1,0 +1,121 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Matcha Corner - Main Page</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+    <div class="container main-container">
+        <h1>matcha corner</h1>
+        <h2>hello, <span id="username"></span>!</h2>
+        <p>add matcha to the list</p>
+
+        <form id="matchaForm">
+
+            <label>matcha name</label>
+            <input type="text" id="name" placeholder="e.g. strawberry matcha" required>
+
+            <label>price</label>
+            <input type="number" id="price" min="0.01" step="0.01" placeholder="e.g. 150" required>
+
+            <label>variant</label>
+            <input type="text" id="variant" placeholder="e.g. iced / hot" required>
+
+            <button type="submit">add</button>
+
+        </form>
+
+        <h2>matcha list</h2>
+        <div id="matchaList"></div>
+        <p id="message"></p>
+
+        <button onclick="logout()">logout</button>
+    </div>
+
+    <script>
+        async function loadPage() {
+            const userResponse = await fetch("/api/me");
+
+            if (!userResponse.ok) {
+                window.location.href = "/login";
+                return;
+            }
+
+            const user = await userResponse.json();
+            document.getElementById("username").textContent = user.username;
+
+            loadMatcha();
+        }
+
+        async function loadMatcha() {
+            const response = await fetch("/api/matcha");
+
+            if (!response.ok) return;
+
+            const items = await response.json();
+            const list = document.getElementById("matchaList");
+
+            list.innerHTML = "";
+
+            if (items.length === 0) {
+                list.textContent = "No matcha added yet.";
+            }
+
+            items.forEach(function(item) {
+                const box = document.createElement("div");
+                box.className = "product";
+
+                const name = document.createElement("h3");
+                name.textContent = item.name;
+
+                const price = document.createElement("p");
+                price.textContent = "price: ₱" + Number(item.price).toFixed(2);
+
+                const variant = document.createElement("p");
+                variant.textContent = "variant: " + item.variant;
+
+                box.append(name, price, variant);
+                list.appendChild(box);
+            });
+        }
+
+        document.getElementById("matchaForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
+
+            const name = document.getElementById("name").value;
+            const price = Number(document.getElementById("price").value);
+            const variant = document.getElementById("variant").value;
+
+            const response = await fetch("/api/matcha", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({
+                    name: name,
+                    price: price,
+                    variant: variant
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                document.getElementById("message").textContent = "Matcha added successfully!";
+                document.getElementById("matchaForm").reset();
+                loadMatcha();
+            } else {
+                alert(data.detail);
+            }
+        });
+
+        async function logout() {
+            await fetch("/api/logout", {method: "POST"});
+            window.location.href = "/login";
+        }
+
+        loadPage();
+    </script>
+
+</body>
+</html>

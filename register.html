@@ -1,0 +1,73 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Matcha Corner - Register</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+    <div class="container">
+        <h1>matcha corner</h1>
+        <h2>register page</h2>
+
+        <form id="registerForm">
+
+            <label>user</label>
+            <input type="text" id="username" required>
+
+            <label>password</label>
+            <input type="password" id="password" required>
+
+            <label>confirm password</label>
+            <input type="password" id="confirm" required>
+
+            <button type="submit">register</button>
+
+        </form>
+
+        <p>Already have an account?
+            <a href="/login">login here</a>
+        </p>
+    </div>
+
+    <script>
+        document.getElementById("registerForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
+
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            const confirm = document.getElementById("confirm").value;
+
+            if (password !== confirm) {
+                alert("Passwords do not match!");
+                return;
+            }
+
+            try {
+                const response = await fetch("/api/register", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({
+                        username: username,
+                        password: password
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert("Registration successful!");
+                    window.location.href = "/login";
+                } else {
+                    alert(data.detail);
+                }
+
+            } catch (error) {
+                alert("Something went wrong.");
+            }
+        });
+    </script>
+
+</body>
+</html>
